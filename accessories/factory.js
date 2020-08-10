@@ -21,13 +21,20 @@ module.exports = homebridge => {
 
   const {
     ShellyDoorWindowAccessory,
+    ShellyDoorWindow2Accessory,
     ShellyFloodAccessory,
+    ShellyGasSmokeSensorAccessory,
     ShellyHTAccessory,
     ShellyRelayContactSensorAccessory,
     ShellyRelayMotionSensorAccessory,
     ShellyRelayOccupancySensorAccessory,
     ShellySenseAccessory,
   } = require('./sensors')(homebridge)
+
+  const {
+    ShellyButton1StatelessSwitchAccessory,
+    ShellyInputStatelessSwitchAccessory,
+  } = require('./stateless-switches')(homebridge)
 
   const {
     ShellyRelaySwitchAccessory,
@@ -179,6 +186,21 @@ module.exports = homebridge => {
   }
   FACTORIES.set('SHBLB-1', ShellyBulbFactory)
 
+  class ShellyButton1Factory extends AccessoryFactory {
+    get friendlyName() {
+      return 'Shelly Button 1'
+    }
+
+    get defaultAccessoryType() {
+      return 'statelessSwitch'
+    }
+
+    _createAccessory(accessoryType, ...opts) {
+      return new ShellyButton1StatelessSwitchAccessory(this.device, ...opts)
+    }
+  }
+  FACTORIES.set('SHBTN-1', ShellyButton1Factory)
+
   /**
    * Shelly Duo factory.
    */
@@ -235,14 +257,68 @@ module.exports = homebridge => {
   FACTORIES.set('SHDW-1', ShellyDoorWindowFactory)
 
   /**
+   * Shelly Door/Window 2 factory.
+   */
+  class ShellyDoorWindow2Factory extends AccessoryFactory {
+    get friendlyName() {
+      return 'Shelly Door/Window 2'
+    }
+
+    get defaultAccessoryType() {
+      return 'sensor'
+    }
+
+    _createAccessory(accessoryType, ...opts) {
+      return new ShellyDoorWindow2Accessory(this.device, ...opts)
+    }
+  }
+  FACTORIES.set('SHDW-2', ShellyDoorWindow2Factory)
+
+  /**
    * Shelly EM factory.
    */
   class ShellyEMFactory extends RelayAccessoryFactory {
     get friendlyName() {
       return 'Shelly EM'
     }
+
+    get numberOfPowerMeters() {
+      return 2
+    }
   }
   FACTORIES.set('SHEM', ShellyEMFactory)
+
+  /**
+   * Shelly 3EM factory.
+   */
+  class Shelly3EMFactory extends RelayAccessoryFactory {
+    get friendlyName() {
+      return 'Shelly 3EM'
+    }
+
+    get numberOfPowerMeters() {
+      return 3
+    }
+  }
+  FACTORIES.set('SHEM-3', Shelly3EMFactory)
+
+  /**
+   * Shelly Gas factory.
+   */
+  class ShellyGasFactory extends AccessoryFactory {
+    get friendlyName() {
+      return 'Shelly Gas'
+    }
+
+    get defaultAccessoryType() {
+      return 'smokeSensor'
+    }
+
+    _createAccessory(accessoryType, ...opts) {
+      return new ShellyGasSmokeSensorAccessory(this.device, ...opts)
+    }
+  }
+  FACTORIES.set('SHGS-1', ShellyGasFactory)
 
   /**
    * Shelly H&T factory.
@@ -261,6 +337,30 @@ module.exports = homebridge => {
     }
   }
   FACTORIES.set('SHHT-1', ShellyHTFactory)
+
+  /**
+   * Shelly i3 factory.
+   */
+  class ShellyI3Factory extends AccessoryFactory {
+    get defaultName() {
+      return 'Shelly i3'
+    }
+
+    get defaultAccessoryType() {
+      return 'statelessSwitch'
+    }
+
+    _createAccessory(accessoryType, index, config, log) {
+      return new ShellyInputStatelessSwitchAccessory(
+        this.device,
+        index,
+        config,
+        log,
+        3
+      )
+    }
+  }
+  FACTORIES.set('SHIX3-1', ShellyI3Factory)
 
   /**
    * Shelly Plug factory.

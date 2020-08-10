@@ -14,6 +14,7 @@ module.exports = homebridge => {
   const PowerConsumptionAbility =
     require('../abilities/power-consumption')(homebridge)
   const Service = homebridge.hap.Service
+  const SmokeSensorAbility = require('../abilities/smoke-sensor')(homebridge)
   const TemperatureSensorAbility =
     require('../abilities/temperature-sensor')(homebridge)
   const { ShellyAccessory } = require('./base')(homebridge)
@@ -38,12 +39,36 @@ module.exports = homebridge => {
     }
   }
 
+  class ShellyDoorWindow2Accessory extends ShellySensorAccessory {
+    constructor(device, index, config, log) {
+      super(device, index, config, log, [
+        new ContactSensorAbility('dwIsOpened'),
+        new LightSensorAbility('luminosity'),
+        new TemperatureSensorAbility('extTemp'),
+        new BatteryAbility('battery')
+      ])
+    }
+  }
+
   class ShellyFloodAccessory extends ShellySensorAccessory {
     constructor(device, index, config, log) {
       super(device, index, config, log, [
         new LeakSensorAbility('flood'),
         new TemperatureSensorAbility('temperature'),
         new BatteryAbility('battery'),
+      ])
+    }
+  }
+
+  class ShellyGasSmokeSensorAccessory extends ShellySensorAccessory {
+    constructor(device, index, config, log) {
+      super(device, index, config, log, [
+        new SmokeSensorAbility({
+          name: 'alarmState',
+          getter: function() {
+            return this.alarmState !== 'unknown' && this.alarmState !== 'none'
+          },
+        })
       ])
     }
   }
@@ -129,7 +154,9 @@ module.exports = homebridge => {
 
   return {
     ShellyDoorWindowAccessory,
+    ShellyDoorWindow2Accessory,
     ShellyFloodAccessory,
+    ShellyGasSmokeSensorAccessory,
     ShellyHTAccessory,
     ShellyRelayContactSensorAccessory,
     ShellyRelayMotionSensorAccessory,
